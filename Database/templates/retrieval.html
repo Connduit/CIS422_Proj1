@@ -1,0 +1,11 @@
+
+{% block title %}{{title}}{% endblock %}
+<title>{{title}}</title>
+<h1>Content!</h1>
+<br><br>
+
+<form action="/output" method="POST">
+	<label for="username">Username:</label><br>
+	<input type="text" id="username" name="username" value=""><br><br>
+	<input type="submit" value="Submit">
+</form>
