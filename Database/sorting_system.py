@@ -43,13 +43,42 @@ def age(user_age):
         return 2
     elif user_age >= 16:
         return 1
+    else:
+        return 0
 
 def job(user_job):
-    if user_job == "FIRST_RESPONDER":
-        return 20
+    if user_job.lower()[0] == "y":
+        return 50
+    else:
+        return 0
 
 def health(user_health):
-    if user_health:
+    if user_health.lower()[0] == "y":
         return 9
+    else:
+        return 0
+
+def priority(num):
+    if num >= 50:
+        return "First"
+    elif num >= 15:
+        return "Second"
+    elif num >= 14:
+        return "Third"
+    elif num >= 13:
+        return "Fourth"
+    elif num >= 5:
+        return "Fifth"
+    elif num >= 4:
+        return "Sixth"
+    elif num >= 3:
+        return "Seventh"
+    elif num >= 2:
+        return "Eigth"
+    elif num >= 1:
+        return "Ninth"
+    else:
+        return "Tenth"
+
 
 

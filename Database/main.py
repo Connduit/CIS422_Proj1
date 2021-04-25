@@ -11,7 +11,7 @@ $env:FLASK_APP = "main.py"
 
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
-from sorting_system import distance
+from sorting_system import distance, age, job, health, priority
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"
@@ -28,6 +28,7 @@ class User(db.Model):
     address = db.Column(db.String(200), nullable=False)
     job = db.Column(db.String(50), nullable=False)
     age = db.Column(db.String(10), nullable=False)
+    health = db.Column(db.String(50), nullable=False)
 
     def __repr__(self):
         return f"first name = {self.first_name}, last name = {self.last_name}, city = {self.city}, state = {self.state}, address = {self.address}, job = {self.job}, age = {self.age}, id = {self.id}"
@@ -64,10 +65,11 @@ def database():
     address = request.form.get("address")
     job = request.form.get("job")
     age = request.form.get("age")
+    health = request.form.get("health")
 
 
     if request.method == "POST":
-        new_user = User(first_name=fn, last_name=ln, city=city, state=state, address=address, job=job, age=age)
+        new_user = User(first_name=fn, last_name=ln, city=city, state=state, address=address, job=job, age=age, health=health)
         try:
             db.session.add(new_user)
             db.session.commit()
@@ -102,11 +104,19 @@ def output():
     user = User.query.get(user_id)
 
     """sorting_system is called here"""
-    user_state = user.state.lower()
+    try:
+        user_state = user.state.lower()
+    except:
+        return "INVALID USERID"
+
     providers = Provider.query.filter_by(state=user_state).all()
     d = distance(user.address, providers)
 
-    return render_template("output.html", title=title, out=d)
+    prio = priority(job(user.job) + age(int(user.age)) + health(user.health))
+
+    return render_template("output.html", title=title, dist=d, prio=prio)
+
+
 
 def buildProviderDB(filename):
     with open(filename) as file:
