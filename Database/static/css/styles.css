@@ -1,0 +1,18 @@
+@charset "UTF-8";
+
+body {
+	background-color: #EEFFEE;
+	margin-left: 20px;
+}
+
+h1 {
+	font:26px Helvetica, Arial;
+}
+
+label {
+	font:20px Helvetica, Arial;
+}
+
+input {
+	font:16px Helvetica, Arial;	
+}
