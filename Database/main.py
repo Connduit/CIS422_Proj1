@@ -30,19 +30,12 @@ class User(db.Model):
     age = db.Column(db.String(10), nullable=False)
     health = db.Column(db.String(50), nullable=False)
 
-    def __repr__(self):
-        return f"first name = {self.first_name}, last name = {self.last_name}, city = {self.city}, state = {self.state}, address = {self.address}, job = {self.job}, age = {self.age}, id = {self.id}"
-        #return f"Your username is {self.first_name}{self.last_name}{self.id}"
-
 class Provider(db.Model):
     __bind_key__ = "providers"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), unique=True, nullable=False)
     state = db.Column(db.String(50), nullable=False)
     address = db.Column(db.String(200), unique=True, nullable=False)
-
-    def __repr__(self):
-        return f"{self.name},{self.address}"
 
 
 @app.route("/")
@@ -55,9 +48,9 @@ def userform():
     title = "userform"
     return render_template("userform.html",title=title)
 
-@app.route("/database", methods=["POST","GET"])
-def database():
-    title = "database"
+@app.route("/username", methods=["POST"])
+def username():
+    title = "username"
     fn = request.form.get("fname")
     ln = request.form.get("lname")
     city = request.form.get("city")
@@ -67,34 +60,23 @@ def database():
     age = request.form.get("age")
     health = request.form.get("health")
 
-
     if request.method == "POST":
         new_user = User(first_name=fn, last_name=ln, city=city, state=state, address=address, job=job, age=age, health=health)
         try:
             db.session.add(new_user)
             db.session.commit()
-            return redirect("/database")
+            #return redirect("/")
+            return render_template("username.html", title=title, first=fn,last=ln,id=new_user.id)
         except:
             return "FAILED TO ADD USER TO DATABASE"
-    else:
-        all_users = User.query.order_by(User.id)
-        return render_template("database.html",title=title, users=all_users)
 
-
-@app.route("/delete/<int:id>")
-def delete(id):
-    user_delete = User.query.get_or_404(id)
-    try:
-        db.session.delete(user_delete)
-        db.session.commit()
-        return redirect("/database")
-    except:
-        return "FAILED TO DELETE USER FROM DATABASE"
 
 @app.route("/retrieval")
 def retrieval():
     title = "retrieval"
     return render_template("retrieval.html",title=title)
+
+
 
 @app.route("/output", methods=["POST"])
 def output():
@@ -113,7 +95,6 @@ def output():
     d = distance(user.address, providers)
 
     prio = priority(job(user.job) + age(int(user.age)) + health(user.health))
-
     return render_template("output.html", title=title, dist=d, prio=prio)
 
 
@@ -133,10 +114,6 @@ def buildProviderDB(filename):
                 db.session.commit()
             except:
                 pass 
-
-
-
-
 
 
 
