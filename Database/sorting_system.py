@@ -3,8 +3,8 @@ pip install geopy
 pip install haversine
 """
 
-import haversine as hs
 from geopy.geocoders import Nominatim
+from geopy.distance import great_circle
 
 
 
@@ -18,17 +18,19 @@ def distance(user_address, vaccine_addresses):
 
     min_dist = -1
     name = None
+    full_address = None
     for vaccine_address in vaccine_addresses:
         vaccine_location = geolocator.geocode(vaccine_address.address)
         vaccine_coordinates = (vaccine_location.latitude, vaccine_location.longitude)
 
-        new_dist = hs.haversine(user_coordinates, vaccine_coordinates)
+        new_dist = great_circle(user_coordinates, vaccine_coordinates).miles
         if new_dist < min_dist or min_dist == -1:
             min_dist = new_dist
             name = vaccine_address.name
+            full_address = vaccine_address.full_address
 
 
-    return f"{name}, {round(min_dist,2)} km"
+    return f"{name}:{full_address}:{round(min_dist,2)} miles"
 
 def age(user_age):
     if user_age >= 75:

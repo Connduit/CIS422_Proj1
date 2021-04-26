@@ -36,6 +36,7 @@ class Provider(db.Model):
     name = db.Column(db.String(200), unique=True, nullable=False)
     state = db.Column(db.String(50), nullable=False)
     address = db.Column(db.String(200), unique=True, nullable=False)
+    full_address = db.Column(db.String(200), unique=True, nullable=False)
 
 
 @app.route("/")
@@ -65,7 +66,6 @@ def username():
         try:
             db.session.add(new_user)
             db.session.commit()
-            #return redirect("/")
             return render_template("username.html", title=title, first=fn,last=ln,id=new_user.id)
         except:
             return "FAILED TO ADD USER TO DATABASE"
@@ -92,23 +92,29 @@ def output():
         return "INVALID USERID"
 
     providers = Provider.query.filter_by(state=user_state).all()
-    d = distance(user.address, providers)
+    if len(providers) == 0:
+        providers = Provider.query.order_by(Provider.id).all()
+
+    d = distance(f"{user.address} {user.city}", providers).split(":")
+    name = d[0].strip()
+    faddress=d[1].strip()
+    dist=d[2].strip()
 
     prio = priority(job(user.job) + age(int(user.age)) + health(user.health))
-    return render_template("output.html", title=title, dist=d, prio=prio)
+    return render_template("output.html", title=title, name=name, address=faddress,dist=dist, prio=prio)
 
 
 
 def buildProviderDB(filename):
     with open(filename) as file:
         for line in file:
-            name = line.strip()
-            address = next(file)
-            address = address.split(",")
-            state = address[2].strip()
+            name = line[:line.index("-")].strip()
+            full_address = next(file)
+            street_address = full_address.split(",")
+            state = street_address[2].strip()
             state = state[:state.index(" ")].lower()
-            address = address[0].strip()
-            new_provider = Provider(name=name, state=state, address=address)
+            street_address = street_address[0].strip()
+            new_provider = Provider(name=name, state=state, address=street_address, full_address=full_address)
             try:
                 db.session.add(new_provider)
                 db.session.commit()
@@ -119,7 +125,7 @@ def buildProviderDB(filename):
 
 
 if __name__ == "__main__":
-    newProviders = False
+    newProviders = True
     filename = "vaccine_location.txt"
     if newProviders:
         buildProviderDB(filename)
