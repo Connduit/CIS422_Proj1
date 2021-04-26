@@ -96,9 +96,7 @@ def output():
         providers = Provider.query.order_by(Provider.id).all()
 
     d = distance(f"{user.address} {user.city}", providers).split(":")
-    name = d[0].strip()
-    faddress=d[1].strip()
-    dist=d[2].strip()
+    name, faddress, dist = d[0].strip(), d[1].strip(), d[2].strip()
 
     prio = priority(job(user.job) + age(int(user.age)) + health(user.health))
     return render_template("output.html", title=title, name=name, address=faddress,dist=dist, prio=prio)
@@ -109,11 +107,11 @@ def buildProviderDB(filename):
     with open(filename) as file:
         for line in file:
             name = line[:line.index("-")].strip()
-            full_address = next(file)
-            street_address = full_address.split(",")
-            state = street_address[2].strip()
+            full_address = next(file).strip()
+            full_list = full_address.split(",")
+            street_address = f"{full_list[0]}{full_list[1]}"
+            state = full_list[2].strip()
             state = state[:state.index(" ")].lower()
-            street_address = street_address[0].strip()
             new_provider = Provider(name=name, state=state, address=street_address, full_address=full_address)
             try:
                 db.session.add(new_provider)
